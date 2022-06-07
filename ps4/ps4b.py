@@ -3,6 +3,7 @@
 # Collaborators:
 # Time Spent: x:xx
 
+from cgitb import enable, text
 import string
 
 ### HELPER CODE ###
@@ -24,6 +25,19 @@ def load_words(file_name):
     for line in inFile:
         wordlist.extend([word.lower() for word in line.split(' ')])
     print("  ", len(wordlist), "words loaded.")
+    return wordlist
+
+def clean_load_words(file_name):
+    '''
+    same function as load_words() above, but does so 
+    without print statement - for secondary use in functions
+    '''
+    # inFile: file
+    inFile = open(file_name, 'r')
+    # wordlist: list of strings
+    wordlist = []
+    for line in inFile:
+        wordlist.extend([word.lower() for word in line.split(' ')])
     return wordlist
 
 def is_word(word_list, word):
@@ -71,8 +85,9 @@ class Message(object):
             self.valid_words (list, determined using helper function load_words)
         '''
         self.text = text
+        word_list = clean_load_words('words.txt')
 
-        self.valid_words = [n for n in text if is_word(load_words('words.txt'), n) == True]
+        self.valid_words = [n for n in text if is_word(word_list, n) == True]
 
         def __str__ (self):
             return self.text
@@ -98,7 +113,7 @@ class Message(object):
         return valid_words_copy
 
 
-    def build_shift_dict(shift):
+    def build_shift_dict(self, shift):
         '''
         Creates a dictionary that can be used to apply a cipher to a letter.
         The dictionary maps every uppercase and lowercase letter to a
@@ -135,7 +150,12 @@ class Message(object):
         Returns: the message text (string) in which every character is shifted
              down the alphabet by the input shift
         '''
-        pass #delete this line and replace with your code here
+        shift_text = list(self.get_message_text())
+        shift_dict = self.build_shift_dict(shift)
+
+        shifted_text = [(shift_dict[n] if n in shift_dict else n) for n in shift_text]
+
+        return "".join(shifted_text)
 
 class PlaintextMessage(Message):
     def __init__(self, text, shift):
@@ -153,7 +173,10 @@ class PlaintextMessage(Message):
             self.message_text_encrypted (string, created using shift)
 
         '''
-        pass #delete this line and replace with your code here
+        self.text = text
+        self.shift = shift
+        self.encryption_dict = self.build_shift_dict(shift)
+        self.message_text_encrypted = self.apply_shift(shift)
 
     def get_shift(self):
         '''
@@ -161,7 +184,7 @@ class PlaintextMessage(Message):
         
         Returns: self.shift
         '''
-        pass #delete this line and replace with your code here
+        return self.shift
 
     def get_encryption_dict(self):
         '''
@@ -169,7 +192,7 @@ class PlaintextMessage(Message):
         
         Returns: a COPY of self.encryption_dict
         '''
-        pass #delete this line and replace with your code here
+        return self.encryption_dict
 
     def get_message_text_encrypted(self):
         '''
@@ -177,7 +200,7 @@ class PlaintextMessage(Message):
         
         Returns: self.message_text_encrypted
         '''
-        pass #delete this line and replace with your code here
+        return self.message_text_encrypted
 
     def change_shift(self, shift):
         '''
@@ -189,11 +212,11 @@ class PlaintextMessage(Message):
 
         Returns: nothing
         '''
-        pass #delete this line and replace with your code here
+        self.shift = shift
 
 
 class CiphertextMessage(Message):
-    def __init__(self, text):
+    def __init__(self, text, *args, **kwargs):
         '''
         Initializes a CiphertextMessage object
                 
@@ -203,7 +226,9 @@ class CiphertextMessage(Message):
             self.message_text (string, determined by input text)
             self.valid_words (list, determined using helper function load_words)
         '''
-        pass #delete this line and replace with your code here
+        super().__init__(text, *args, **kwargs)
+        self.text = text
+        
 
     def decrypt_message(self):
         '''
@@ -221,22 +246,40 @@ class CiphertextMessage(Message):
         Returns: a tuple of the best shift value used to decrypt the message
         and the decrypted message text using that shift value
         '''
-        pass #delete this line and replace with your code here
+
+        best_list = []
+        best_shift = int
+
+        for i in range(0,26):
+            # initiated 'test_list' as 'Cipher...' to test super() for inheretence (instead of intiating as 'Message') 
+            test_list = CiphertextMessage(self.apply_shift(i).split())
+            current_list = test_list.get_valid_words()
+            if len(current_list) > len(best_list):
+                best_list = current_list
+                best_shift = i
+        return (best_shift, " ".join(best_list))
 
 if __name__ == '__main__':
 
-#    #Example test case (PlaintextMessage)
-#    plaintext = PlaintextMessage('hello', 2)
-#    print('Expected Output: jgnnq')
-#    print('Actual Output:', plaintext.get_message_text_encrypted())
-#
-#    #Example test case (CiphertextMessage)
-#    ciphertext = CiphertextMessage('jgnnq')
-#    print('Expected Output:', (24, 'hello'))
-#    print('Actual Output:', ciphertext.decrypt_message())
+    #Example test case (PlaintextMessage)
+    plaintext = PlaintextMessage('hello', 2)
+    print('Expected Output: jgnnq')
+    print('Actual Output:', plaintext.get_message_text_encrypted())
 
-    #TODO: WRITE YOUR TEST CASES HERE
+    #Example test case (CiphertextMessage)
+    ciphertext = CiphertextMessage('jgnnq')
+    print('Expected Output:', (24, 'hello'))
+    print('Actual Output:', ciphertext.decrypt_message())
 
-    #TODO: best shift value and unencrypted story 
-    
-    pass #delete this line and replace with your code here
+    #Example test case (CiphertextMessage)
+    ciphertext = CiphertextMessage(get_story_string())
+    print('Expected Output:', ('best_shift', 'decrypted story text'))
+    print('Actual Output:', ciphertext.decrypt_message())
+
+    # Best shift: 12
+    # Story: 'Jack is a mythical character created on the spur of a moment 
+    # to help cover an planned hack. He has been registered for classes 
+    # at twice before, but has reportedly never passed It has been 
+    # the tradition of the residents of East Campus to become Jack for 
+    # a few nights year to educate incoming students in the ways, means, 
+    # and ethics of hacking.'
