@@ -1,4 +1,6 @@
 import string
+from ps4a import *
+import random
 
 """def multi_recur(a, b):
     if b == 1:
@@ -55,3 +57,45 @@ def apply_shift(shift):
         return "".join(shifted_text)
 
 #print(apply_shift(24))
+
+def build_transpose_dict(vowels_permutation):
+        '''
+        vowels_permutation (string): a string containing a permutation of vowels (a, e, i, o, u)
+        
+        Creates a dictionary that can be used to apply a cipher to a letter.
+        The dictionary maps every uppercase and lowercase letter to an
+        uppercase and lowercase letter, respectively. Vowels are shuffled 
+        according to vowels_permutation. The first letter in vowels_permutation 
+        corresponds to a, the second to e, and so on in the order a, e, i, o, u.
+        The consonants remain the same. The dictionary should have 52 
+        keys of all the uppercase letters and all the lowercase letters.
+
+        Example: When input "eaiuo":
+        Mapping is a->e, e->a, i->i, o->u, u->o
+        and "Hello World!" maps to "Hallu Wurld!"
+
+        Returns: a dictionary mapping a letter (string) to 
+                 another letter (string).
+        '''
+
+        VOWELS_LOWER = 'aeiou'
+        VOWELS_UPPER = 'AEIOU'
+        CONSONANTS_LOWER = 'bcdfghjklmnpqrstvwxyz'
+        CONSONANTS_UPPER = 'BCDFGHJKLMNPQRSTVWXYZ'
+
+        vow_low = VOWELS_LOWER
+        vow_up = VOWELS_UPPER
+        cons_low = CONSONANTS_LOWER
+        cons_up = CONSONANTS_UPPER
+        
+        shuffled_vowels = random.choice(get_permutations(vowels_permutation))
+
+        lower_map = {vow_low[i]:shuffled_vowels[i] for i in range(len(vow_low))}
+
+        upper_map = {vow_up[i]:shuffled_vowels[i].upper() for i in range (len(vow_up))}
+
+        map_dict = {**lower_map, **upper_map, **{cons_low[i]:cons_low[i] for i in range(len(cons_low))}, **{cons_up[i]:cons_up[i] for i in range(len(cons_up))}}
+
+        return map_dict
+
+print(build_transpose_dict('aeiou'))

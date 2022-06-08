@@ -3,8 +3,12 @@
 # Collaborators:
 # Time Spent: x:xx
 
-import string
 from ps4a import get_permutations
+from ps4b import *
+import random
+import time
+
+start_time = time.time()
 
 ### HELPER CODE ###
 def load_words(file_name):
@@ -59,8 +63,8 @@ VOWELS_UPPER = 'AEIOU'
 CONSONANTS_LOWER = 'bcdfghjklmnpqrstvwxyz'
 CONSONANTS_UPPER = 'BCDFGHJKLMNPQRSTVWXYZ'
 
-class SubMessage(object):
-    def __init__(self, text):
+class SubMessage(Message):
+    def __init__(self, text, *args, **kwargs):
         '''
         Initializes a SubMessage object
                 
@@ -70,7 +74,10 @@ class SubMessage(object):
             self.message_text (string, determined by input text)
             self.valid_words (list, determined using helper function load_words)
         '''
-        pass #delete this line and replace with your code here
+        super().__init__(text, *args, **kwargs)
+
+    def __str__(self):
+        return str(self.text)
     
     def get_message_text(self):
         '''
@@ -78,7 +85,7 @@ class SubMessage(object):
         
         Returns: self.message_text
         '''
-        pass #delete this line and replace with your code here
+        return self.text
 
     def get_valid_words(self):
         '''
@@ -87,29 +94,48 @@ class SubMessage(object):
         
         Returns: a COPY of self.valid_words
         '''
-        pass #delete this line and replace with your code here
+        valid_words_copy = self.valid_words.copy()
+
+        return valid_words_copy
                 
     def build_transpose_dict(self, vowels_permutation):
-        '''
-        vowels_permutation (string): a string containing a permutation of vowels (a, e, i, o, u)
-        
-        Creates a dictionary that can be used to apply a cipher to a letter.
-        The dictionary maps every uppercase and lowercase letter to an
-        uppercase and lowercase letter, respectively. Vowels are shuffled 
-        according to vowels_permutation. The first letter in vowels_permutation 
-        corresponds to a, the second to e, and so on in the order a, e, i, o, u.
-        The consonants remain the same. The dictionary should have 52 
-        keys of all the uppercase letters and all the lowercase letters.
+            '''
+            vowels_permutation (string): a string containing a permutation of vowels (a, e, i, o, u)
+            
+            Creates a dictionary that can be used to apply a cipher to a letter.
+            The dictionary maps every uppercase and lowercase letter to an
+            uppercase and lowercase letter, respectively. Vowels are shuffled 
+            according to vowels_permutation. The first letter in vowels_permutation 
+            corresponds to a, the second to e, and so on in the order a, e, i, o, u.
+            The consonants remain the same. The dictionary should have 52 
+            keys of all the uppercase letters and all the lowercase letters.
 
-        Example: When input "eaiuo":
-        Mapping is a->e, e->a, i->i, o->u, u->o
-        and "Hello World!" maps to "Hallu Wurld!"
+            Example: When input "eaiuo":
+            Mapping is a->e, e->a, i->i, o->u, u->o
+            and "Hello World!" maps to "Hallu Wurld!"
 
-        Returns: a dictionary mapping a letter (string) to 
-                 another letter (string). 
-        '''
-        
-        pass #delete this line and replace with your code here
+            Returns: a dictionary mapping a letter (string) to 
+                    another letter (string).
+            '''
+
+            VOWELS_LOWER = 'aeiou'
+            VOWELS_UPPER = 'AEIOU'
+            CONSONANTS_LOWER = 'bcdfghjklmnpqrstvwxyz'
+            CONSONANTS_UPPER = 'BCDFGHJKLMNPQRSTVWXYZ'
+
+            vow_low = VOWELS_LOWER
+            vow_up = VOWELS_UPPER
+            cons_low = CONSONANTS_LOWER
+            cons_up = CONSONANTS_UPPER
+            
+
+            lower_map = {vow_low[i]:vowels_permutation[i] for i in range(len(vow_low))}
+
+            upper_map = {vow_up[i]:vowels_permutation[i].upper() for i in range (len(vow_up))}
+
+            trans_dict = {**lower_map, **upper_map, **{cons_low[i]:cons_low[i] for i in range(len(cons_low))}, **{cons_up[i]:cons_up[i] for i in range(len(cons_up))}}
+
+            return trans_dict
     
     def apply_transpose(self, transpose_dict):
         '''
@@ -118,11 +144,14 @@ class SubMessage(object):
         Returns: an encrypted version of the message text, based 
         on the dictionary
         '''
-        
-        pass #delete this line and replace with your code here
+
+        trans_list = list(self.text)
+        encrypted_text = [(transpose_dict[n] if n in transpose_dict else n) for n in trans_list]
+
+        return "".join(encrypted_text)
         
 class EncryptedSubMessage(SubMessage):
-    def __init__(self, text):
+    def __init__(self, text, *args, **kwargs):
         '''
         Initializes an EncryptedSubMessage object
 
@@ -132,7 +161,10 @@ class EncryptedSubMessage(SubMessage):
             self.message_text (string, determined by input text)
             self.valid_words (list, determined using helper function load_words)
         '''
-        pass #delete this line and replace with your code here
+        super().__init__(text, *args, **kwargs)
+
+    def __str__(self):
+        return str(self.text)
 
     def decrypt_message(self):
         '''
@@ -152,12 +184,23 @@ class EncryptedSubMessage(SubMessage):
         
         Hint: use your function from Part 4A
         '''
-        pass #delete this line and replace with your code here
+
+        #perm_list = get_permutations('aeiou')
+        best_list = []
+
+        for i in get_permutations('aeiou'):
+            test_list = EncryptedSubMessage(self.apply_transpose(self.build_transpose_dict(i)).split())
+            current_list = test_list.get_valid_words()
+            if len(current_list) > len(best_list):
+                best_list = current_list
+        return " ".join(best_list)
     
 
 if __name__ == '__main__':
 
-    # Example test case
+    # Example test case (SubMessage)
+    print("")
+    print("Example test case (SubMessage) 1 \n")
     message = SubMessage("Hello World!")
     permutation = "eaiuo"
     enc_dict = message.build_transpose_dict(permutation)
@@ -165,6 +208,78 @@ if __name__ == '__main__':
     print("Expected encryption:", "Hallu Wurld!")
     print("Actual encryption:", message.apply_transpose(enc_dict))
     enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
-    print("Decrypted message:", enc_message.decrypt_message())
-     
-    #TODO: WRITE YOUR TEST CASES HERE
+    print("Decrypted message:", enc_message.decrypt_message(), "\n")
+
+    # Example test case (SubMessage) 
+    print("Example test case (SubMessage) 2 \n")
+    message = SubMessage("This is a test!")
+    permutation = "eaiuo"
+    enc_dict = message.build_transpose_dict(permutation)
+    print("Original message:", message.get_message_text(), "Permutation:", permutation)
+    print("Expected encryption:", "This is e tast!")
+    print("Actual encryption:", message.apply_transpose(enc_dict))
+    enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
+    print("Decrypted message:", enc_message.decrypt_message(), "\n")
+
+    """
+    Test cases work perfectly when permutations is set to static "eaiou".
+    However randomising permutation with random.choice(get_permutations(VOWELS))
+    gives differing results as possible numerous 'best cases' are found.
+    Should be shown below repeating "This is a test!" with random permutation.
+
+    Repeating could/should (see random.choice documentation) return both 
+    "This is a test!" AND "Thus us a test!" for decrypted message.
+
+    """
+
+    # Example test case (SubMessage)
+    print("3 Example test cases (SubMessage) repeat with random permutations. \n")
+    print("Random test case 1. \n")
+    message = SubMessage("This is a test!")
+    permutation = random.choice(get_permutations('aeiou'))
+    enc_dict = message.build_transpose_dict(permutation)
+    print("Original message:", message.get_message_text(), "Permutation:", permutation)
+    print("Expected encryption:", "?")
+    print("Actual encryption:", message.apply_transpose(enc_dict))
+    enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
+    print("Decrypted message:", enc_message.decrypt_message(), "\n")
+
+    # Example test case (SubMessage)
+    print("Random test case 2. \n")
+    message = SubMessage("This is a test!")
+    permutation = random.choice(get_permutations('aeiou'))
+    enc_dict = message.build_transpose_dict(permutation)
+    print("Original message:", message.get_message_text(), "Permutation:", permutation)
+    print("Expected encryption:", "?")
+    print("Actual encryption:", message.apply_transpose(enc_dict))
+    enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
+    print("Decrypted message:", enc_message.decrypt_message(), "\n")
+
+    # Example test case (SubMessage)
+    print("Random test case 3. \n")
+    message = SubMessage("This is a test!")
+    permutation = random.choice(get_permutations('aeiou'))
+    enc_dict = message.build_transpose_dict(permutation)
+    print("Original message:", message.get_message_text(), "Permutation:", permutation)
+    print("Expected encryption:", "?")
+    print("Actual encryption:", message.apply_transpose(enc_dict))
+    enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
+    print("Decrypted message:", enc_message.decrypt_message(), "\n")
+
+    #Example test case (EncryptedSubMessage)
+    print("Example test case (EncryptedSubMessage) \n")
+    message = SubMessage("This should test decrypt")
+    enc_message = EncryptedSubMessage(message.apply_transpose(message.build_transpose_dict('eaiuo')))
+    print("Original message:", message.get_message_text())
+    print("Encrypted message:", enc_message.get_message_text())
+    print("Decryted message:", enc_message.decrypt_message(), "\n")
+
+    #Example test case (EncryptedSubMessage)
+    print("Example test case with random permutation (EncryptedSubMessage)  \n")
+    message = SubMessage("This should random test decrypt")
+    enc_message = EncryptedSubMessage(message.apply_transpose(message.build_transpose_dict(random.choice(get_permutations('aeiou')))))
+    print("Original message:", message.get_message_text())
+    print("Encrypted message:", enc_message.get_message_text())
+    print("Decryted message:", enc_message.decrypt_message())
+
+print("--- %s seconds ---" % (time.time() - start_time))

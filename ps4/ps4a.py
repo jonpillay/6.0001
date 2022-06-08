@@ -33,7 +33,7 @@ def get_permutations(sequence, index=0, perm_list=[]):
         get_permutations(perm, index+1, perm_list)
     return perm_list
 
-print(get_permutations('abc'))
+#print(get_permutations('abc'))
 
 if __name__ == '__main__':
 #    #EXAMPLE

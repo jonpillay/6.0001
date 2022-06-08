@@ -227,7 +227,6 @@ class CiphertextMessage(Message):
             self.valid_words (list, determined using helper function load_words)
         '''
         super().__init__(text, *args, **kwargs)
-        self.text = text
         
 
     def decrypt_message(self):
@@ -257,7 +256,7 @@ class CiphertextMessage(Message):
             if len(current_list) > len(best_list):
                 best_list = current_list
                 best_shift = i
-        return (best_shift, " ".join(best_list))
+        return ("Best shift: ", best_shift, "Story: ", " ".join(best_list))
 
 if __name__ == '__main__':
 
